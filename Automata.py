@@ -6,7 +6,7 @@ class FiniteAutomation(object):
     epsilon = ':e:'
 
     def __init__(self, language=set()):
-        self.start_states = None
+        self.start_state = None
         self.states = set()
         self.finish_states = []
         self.language = language
@@ -14,7 +14,7 @@ class FiniteAutomation(object):
         self.transition_fn = dict()
 
     def set_start_state(self, state):
-        self.start_states = state
+        self.start_state = state
         self.states.add(state)
 
     def add_final_state(self, state):
@@ -58,25 +58,20 @@ class FiniteAutomation(object):
                         states.add(to_state)
                         marked.add(to_state)
 
-        return e_closure
+        return frozenset(e_closure)
 
     def get_transition(self, state, char):
-        return self.transition_fn[state][char]
+        if self.transition_fn.has_key(state) and self.transition_fn[state].has_key(char):
+            states = []
+            for s in self.transition_fn[state][char]:
+                states.append(self.get_e_closure(s))
+            return frozenset.union(*states)
+        else:
+            return frozenset([])
 
 
-def test_e_closure():
-    fa = FiniteAutomation()
-    fa.add_transition(1, 2, FiniteAutomation.epsilon)
-    fa.add_transition(1, 3, FiniteAutomation.epsilon)
-    fa.add_transition(2, 3, FiniteAutomation.epsilon)
-    fa.add_transition(3, 1, FiniteAutomation.epsilon)
-    fa.add_transition(3, 2, FiniteAutomation.epsilon)
-    assert fa.get_e_closure(1) == set([1, 2, 3])
+def nfa2dfa(nfa):
+    dfa = FiniteAutomation(nfa.language)
+    dfa.set_start_state(nfa.get_e_closure(nfa.start_state))
 
-
-def test_transition():
-    fa = FiniteAutomation()
-    fa.add_transition(1, 2, FiniteAutomation.epsilon)
-    fa.add_transition(1, 3, FiniteAutomation.epsilon)
-    assert fa.get_transition(1, FiniteAutomation.epsilon) == set([3, 2])
-
+    return dfa
