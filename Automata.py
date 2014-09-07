@@ -1,8 +1,8 @@
 __author__ = 'XinYu'
 
+from graphviz import Digraph
 
 class FiniteAutomation(object):
-
     epsilon = ':e:'
 
     def __init__(self, language=set()):
@@ -22,6 +22,7 @@ class FiniteAutomation(object):
         self.states.add(state)
 
     def add_transition(self, from_state, to_state, char):
+
         self.states.add(from_state)
         self.states.add(to_state)
         if from_state not in self.transition:
@@ -29,7 +30,7 @@ class FiniteAutomation(object):
             self.transition[from_state][to_state] = set([char])
         else:
             if to_state in self.transition[from_state]:
-                self.transition[from_state][to_state] = self.transition[from_state][to_state].add(char)
+                self.transition[from_state][to_state].add(char)
             else:
                 self.transition[from_state][to_state] = set([char])
 
@@ -78,12 +79,36 @@ class FiniteAutomation(object):
         else:
             return frozenset([])
 
+    def sava_graph(self, filename):
+
+        node_dict = {}
+        node_reverse_dict = {}
+
+        node_dict['s0'] = self.start_state
+        node_reverse_dict[self.start_state] = 's0'
+
+        states = self.states.difference(self.start_state)
+
+        for (state, state_index) in zip(states, xrange(1, len(states) + 1)):
+            identifier = 's' + str(state_index)
+            node_dict[identifier] = state
+            node_reverse_dict[state] = identifier
+
+        dot = Digraph(comment='FiniteAutomation')
+
+        for state_x in self.transition:
+            for state_y in self.transition[state_x]:
+                for label in self.transition[state_x][state_y]:
+                    dot.edge(node_reverse_dict[state_x],
+                             node_reverse_dict[state_y],
+                             label)
+        dot.render(filename, view=True)
+
 
 class NFA2DFA(object):
     def __call__(self, nfa):
         dfa = FiniteAutomation(nfa.language)
         dfa.set_start_state(nfa.get_e_closure(nfa.start_state))
-
 
         states = set([dfa.start_state])
         marked = set()
