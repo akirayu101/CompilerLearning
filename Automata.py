@@ -95,7 +95,7 @@ class FiniteAutomation(object):
             node_dict[identifier] = state
             node_reverse_dict[state] = identifier
 
-        dot = Digraph(comment='FiniteAutomation')
+        dot = Digraph(comment='FiniteAutomation', graph_attr={'rankdir': 'LR'})
 
         for state_x in self.transition:
             for state_y in self.transition[state_x]:
