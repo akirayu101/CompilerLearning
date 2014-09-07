@@ -87,7 +87,7 @@ class FiniteAutomation(object):
         node_dict['s0'] = self.start_state
         node_reverse_dict[self.start_state] = 's0'
 
-        states = self.states.difference(self.start_state)
+        states = self.states.difference(set([self.start_state]))
 
         for (state, state_index) in zip(states, xrange(1, len(states) + 1)):
             identifier = 's' + str(state_index)
