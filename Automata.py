@@ -2,8 +2,9 @@ __author__ = 'XinYu'
 
 from graphviz import Digraph
 
+
 class FiniteAutomation(object):
-    epsilon = ':e:'
+    epsilon = u"\u03B5"
 
     def __init__(self, language=set()):
         self.start_state = None
@@ -104,7 +105,7 @@ class FiniteAutomation(object):
                              label)
 
         for s in self.finish_states:
-            dot.node(node_reverse_dict[s], _attributes={'shape':'doublecircle'})
+            dot.node(node_reverse_dict[s], _attributes={'shape': 'doublecircle'})
         dot.render(filename, view=True)
 
 
