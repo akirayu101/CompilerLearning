@@ -23,7 +23,8 @@ class FiniteAutomation(object):
         self.states.add(state)
 
     def add_transition(self, from_state, to_state, char):
-
+        if char != FiniteAutomation.epsilon:
+            self.language.add(char)
         self.states.add(from_state)
         self.states.add(to_state)
         if from_state not in self.transition:

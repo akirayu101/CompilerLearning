@@ -7,7 +7,7 @@ from Automata import FiniteAutomation, NFA2DFA
 class TestAutomata(unittest.TestCase):
 
     def setUp(self):
-        self.fa = FiniteAutomation(set(['0', '1']))
+        self.fa = FiniteAutomation()
         self.fa.set_start_state('A')
         self.fa.add_transition('A', 'B', FiniteAutomation.epsilon)
         self.fa.add_transition('B', 'C', FiniteAutomation.epsilon)
@@ -47,7 +47,6 @@ class TestAutomata(unittest.TestCase):
         self.dfa = NFA2DFA()(self.nfa)
         self.assertEqual(self.dfa.start_state,
                          set(['A', 'B', 'C', 'D', 'H', 'I']))
-
         self.dfa.sava_graph('dfa_graph')
 
 
