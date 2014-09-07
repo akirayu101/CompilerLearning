@@ -102,6 +102,9 @@ class FiniteAutomation(object):
                     dot.edge(node_reverse_dict[state_x],
                              node_reverse_dict[state_y],
                              label)
+
+        for s in self.finish_states:
+            dot.node(node_reverse_dict[s], _attributes={'shape':'doublecircle'})
         dot.render(filename, view=True)
 
 
