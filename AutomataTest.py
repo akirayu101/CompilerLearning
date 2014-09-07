@@ -1,7 +1,7 @@
 __author__ = 'XinYu'
 
 import unittest
-from Automata import FiniteAutomation, nfa2dfa
+from Automata import FiniteAutomation, NFA2DFA
 
 
 class TestAutomata(unittest.TestCase):
@@ -21,18 +21,31 @@ class TestAutomata(unittest.TestCase):
         self.fa.add_transition('I', 'J', '1')
         self.fa.add_transition('G', 'A', FiniteAutomation.epsilon)
         self.fa.add_transition('A', 'H', FiniteAutomation.epsilon)
+        self.fa.add_finish_state('J')
 
         self.nfa = self.fa
 
     def test_eclosure(self):
-        self.assertEqual(self.fa.get_e_closure('A'), set(['A', 'B', 'C', 'D', 'H', 'I']))
+        self.assertEqual(self.fa.get_e_closure('A'),
+                         set(['A', 'B', 'C', 'D', 'H', 'I']))
+        self.assertEqual(self.fa.get_e_closure('G'),
+                         set(['A', 'B', 'C', 'D', 'H', 'I', 'G']))
+        self.assertEqual(self.fa.get_e_closure('B'),
+                         set(['B', 'C', 'D']))
 
     def test_get_transition(self):
-        self.assertEqual(self.fa.get_transition('C', '1'), set(['E', 'G', 'H', 'I', 'A', 'B', 'C', 'D']))
+        self.assertEqual(self.fa.get_transition('C', '1'),
+                         set(['E', 'G', 'H', 'I', 'A', 'B', 'C', 'D']))
+
+    def test_get_transition_r(self):
+        self.assertEqual(
+            self.fa.get_transition_r(set(['A', 'B', 'C', 'D', 'H', 'I']), '0'),
+            set(['F', 'G', 'H', 'I', 'A', 'B', 'C', 'D']))
 
     def test_nfa2dfa(self):
-        self.dfa = nfa2dfa(self.nfa)
-        self.assertEqual(self.dfa.start_state, set(['A', 'B', 'C', 'D', 'H', 'I']))
+        self.dfa = NFA2DFA()(self.nfa)
+        self.assertEqual(self.dfa.start_state,
+                         set(['A', 'B', 'C', 'D', 'H', 'I']))
 
 
 if __name__ == '__main__':

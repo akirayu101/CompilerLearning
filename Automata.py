@@ -8,7 +8,7 @@ class FiniteAutomation(object):
     def __init__(self, language=set()):
         self.start_state = None
         self.states = set()
-        self.finish_states = []
+        self.finish_states = set()
         self.language = language
         self.transition = dict()
         self.transition_fn = dict()
@@ -17,8 +17,8 @@ class FiniteAutomation(object):
         self.start_state = state
         self.states.add(state)
 
-    def add_final_state(self, state):
-        self.finish_states.append(state)
+    def add_finish_state(self, state):
+        self.finish_states.add(state)
         self.states.add(state)
 
     def add_transition(self, from_state, to_state, char):
@@ -69,9 +69,43 @@ class FiniteAutomation(object):
         else:
             return frozenset([])
 
+    def get_transition_r(self, states, char):
+        ret_states = []
+        for state in states:
+            ret_states.append(self.get_transition(state, char))
+        if len(ret_states) > 0:
+            return frozenset.union(*ret_states)
+        else:
+            return frozenset([])
 
-def nfa2dfa(nfa):
-    dfa = FiniteAutomation(nfa.language)
-    dfa.set_start_state(nfa.get_e_closure(nfa.start_state))
 
-    return dfa
+class NFA2DFA(object):
+    def __call__(self, nfa):
+        dfa = FiniteAutomation(nfa.language)
+        dfa.set_start_state(nfa.get_e_closure(nfa.start_state))
+
+
+        states = set([dfa.start_state])
+        marked = set()
+
+        while len(states) > 0:
+            state = states.pop()
+            for s in dfa.language:
+                new_state = nfa.get_transition_r(state, s)
+                if len(new_state) > 0:
+                    dfa.add_transition(state, new_state, s)
+                    if new_state not in marked:
+                        states.add(new_state)
+
+            marked.add(state)
+
+            if NFA2DFA.is_finish_state(state, nfa):
+                dfa.add_finish_state(state)
+
+        return dfa
+
+    @staticmethod
+    def is_finish_state(states, nfa):
+        return len(states.intersection(nfa.finish_states)) > 0
+
+
