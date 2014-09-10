@@ -2,14 +2,15 @@ __author__ = 'XinYu'
 
 from graphviz import Digraph
 
+
 class FiniteAutomation(object):
     epsilon = u"\u03B5"
 
-    def __init__(self, language=set()):
+    def __init__(self):
         self.start_state = None
         self.states = set()
         self.finish_states = set()
-        self.language = language
+        self.language = set()
         self.transition = dict()
         self.transition_fn = dict()
 
@@ -80,6 +81,13 @@ class FiniteAutomation(object):
         else:
             return frozenset([])
 
+    def get_single_transition(self, state, char):
+        if self.transition_fn.has_key(state) and self.transition_fn[state].has_key(char):
+            for s in self.transition_fn[state][char]:
+                return s
+        else:
+            return None
+
     def sava_graph(self, filename):
 
         node_dict = {}
@@ -142,18 +150,51 @@ class NFA2DFA(object):
         P = set()
         Q = set([frozenset(dfa.finish_states), frozenset(dfa.states.difference(dfa.finish_states))])
 
+        # get subset combination
         while P != Q:
             P = Q
             Q = set()
             for p in P:
-                Q = Q.union(NFA2DFA.split(p, P, dfa))
-
-        pass
+                Q = set.union(NFA2DFA.split(p, P, dfa), Q)
 
     @staticmethod
     def split(p, P, dfa):
-        subsets = set()
+        subdict = {frozenset(): set()}
+        reverse_dict = {}
+
+        # 1.building reverse dict for classify
+        for states in P:
+            for state in states:
+                reverse_dict[state] = frozenset(states)
+
+        # 2.build subdict for get result
+        for states in P:
+            subdict[frozenset(states)] = set()
+
+        # 3.real split set here
         for c in dfa.language:
-            return frozenset([p])
+            result_state_list = []
+            for state in p:
+                result_state_list.append(dfa.get_single_transition(state, c))
+
+            for index, item in enumerate(result_state_list):
+                if item:
+                    result_state_list[index] = reverse_dict[item]
+                else:
+                    result_state_list[index] = item
+
+            # here we need split
+            if len(set(result_state_list)) > 1:
+                transition_kv = zip(p, result_state_list)
+
+                for (k, v) in transition_kv:
+                    if v:
+                        subdict[v].add(k)
+                    else:
+                        subdict[frozenset()].add(k)
+                return set([frozenset(x) for x in subdict.values() if len(x) > 0])
+
+        return set([frozenset(p)])
+
 
 
