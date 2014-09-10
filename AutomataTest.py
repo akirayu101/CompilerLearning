@@ -61,6 +61,8 @@ class TestAutomata(unittest.TestCase):
         self.dfa.add_finish_state('s3')
         self.dfa.add_finish_state('s5')
 
+        NFA2DFA.minimalDFA(self.dfa)
+
         self.dfa.sava_graph('beforeMinimal')
 
 

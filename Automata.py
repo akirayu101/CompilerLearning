@@ -2,7 +2,6 @@ __author__ = 'XinYu'
 
 from graphviz import Digraph
 
-
 class FiniteAutomation(object):
     epsilon = u"\u03B5"
 
@@ -141,6 +140,20 @@ class NFA2DFA(object):
     @staticmethod
     def minimalDFA(dfa):
         P = set()
-        Q = set([dfa.finish_states, dfa.states.difference(dfa.finish_states)])
+        Q = set([frozenset(dfa.finish_states), frozenset(dfa.states.difference(dfa.finish_states))])
+
+        while P != Q:
+            P = Q
+            Q = set()
+            for p in P:
+                Q = Q.union(NFA2DFA.split(p, P, dfa))
+
+        pass
+
+    @staticmethod
+    def split(p, P, dfa):
+        subsets = set()
+        for c in dfa.language:
+            return frozenset([p])
 
 
