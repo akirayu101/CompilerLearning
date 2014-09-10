@@ -138,4 +138,9 @@ class NFA2DFA(object):
     def is_finish_state(states, nfa):
         return len(states.intersection(nfa.finish_states)) > 0
 
+    @staticmethod
+    def minimalDFA(dfa):
+        P = set()
+        Q = set([dfa.finish_states, dfa.states.difference(dfa.finish_states)])
+
 

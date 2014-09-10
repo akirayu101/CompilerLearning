@@ -49,6 +49,21 @@ class TestAutomata(unittest.TestCase):
                          set(['A', 'B', 'C', 'D', 'H', 'I']))
         self.dfa.sava_graph('dfa_graph')
 
+    def test_minimalDFA(self):
+        self.dfa = FiniteAutomation()
+        self.dfa.set_start_state('s0')
+        self.dfa.add_transition('s0', 's1', 'f')
+        self.dfa.add_transition('s1', 's2', 'e')
+        self.dfa.add_transition('s1', 's4', 'i')
+        self.dfa.add_transition('s2', 's3', 'e')
+        self.dfa.add_transition('s4', 's5', 'e')
+
+        self.dfa.add_finish_state('s3')
+        self.dfa.add_finish_state('s5')
+
+        self.dfa.sava_graph('beforeMinimal')
+
+
 
 if __name__ == '__main__':
     unittest.main()
