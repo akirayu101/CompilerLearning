@@ -119,7 +119,7 @@ class FiniteAutomation(object):
 
 class NFA2DFA(object):
     def __call__(self, nfa):
-        dfa = FiniteAutomation(nfa.language)
+        dfa = FiniteAutomation()
         dfa.set_start_state(nfa.get_e_closure(nfa.start_state))
 
         states = set([dfa.start_state])
@@ -127,7 +127,7 @@ class NFA2DFA(object):
 
         while len(states) > 0:
             state = states.pop()
-            for s in dfa.language:
+            for s in nfa.language:
                 new_state = nfa.get_transition_r(state, s)
                 if len(new_state) > 0:
                     dfa.add_transition(state, new_state, s)
@@ -139,7 +139,7 @@ class NFA2DFA(object):
             if NFA2DFA.is_finish_state(state, nfa):
                 dfa.add_finish_state(state)
 
-        return dfa
+        return NFA2DFA.minimalDFA(dfa)
 
     @staticmethod
     def is_finish_state(states, nfa):

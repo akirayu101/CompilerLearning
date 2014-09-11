@@ -43,10 +43,7 @@ class TestAutomata(unittest.TestCase):
             set(['F', 'G', 'H', 'I', 'A', 'B', 'C', 'D']))
 
     def test_nfa2dfa(self):
-        self.nfa.sava_graph('nfa_graph')
         self.dfa = NFA2DFA()(self.nfa)
-        self.assertEqual(self.dfa.start_state,
-                         set(['A', 'B', 'C', 'D', 'H', 'I']))
         self.dfa.sava_graph('dfa_graph')
 
     def test_minimalDFA(self):

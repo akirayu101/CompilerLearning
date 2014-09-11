@@ -1,0 +1,9 @@
+// FiniteAutomation
+digraph {
+	graph [rankdir=LR]
+			s1 -> s1 [label=1]
+			s1 -> s0 [label=0]
+			s0 -> s1 [label=1]
+			s0 -> s0 [label=0]
+		s1 [shape=doublecircle]
+}
