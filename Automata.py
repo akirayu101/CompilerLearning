@@ -1,6 +1,7 @@
 __author__ = 'XinYu'
 
 from graphviz import Digraph
+from copy import deepcopy
 
 
 class FiniteAutomation(object):
@@ -217,6 +218,111 @@ class NFA2DFA(object):
                 return set([frozenset(x) for x in subdict.values() if len(x) > 0])
 
         return set([frozenset(p)])
+
+
+def char2nfa(c):
+    nfa = FiniteAutomation()
+    nfa.set_start_state('s0')
+    nfa.add_finish_state('s1')
+    nfa.add_transition('s0', 's1', c)
+
+    return nfa
+
+
+class NFABuilder(object):
+    @staticmethod
+    def concatentation(nfa_a, nfa_b):
+        nfa = FiniteAutomation()
+        uniq_dict = NFABuilder.gen_uniq_dict(nfa_a, nfa_b)
+        NFABuilder.init_states(nfa_a, nfa_b, uniq_dict, nfa)
+
+        nfa.set_start_state(uniq_dict['a'][nfa_a.start_state])
+
+        for finish_state in nfa_b.finish_states:
+            nfa.add_finish_state(uniq_dict['b'][finish_state])
+
+        for finish_state in nfa_a.finish_states:
+            nfa.add_transition(uniq_dict['a'][finish_state], uniq_dict['b'][nfa_b.start_state], FiniteAutomation.epsilon)
+
+        return nfa
+
+
+    @staticmethod
+    def alternation(nfa_a, nfa_b):
+        nfa = FiniteAutomation()
+        uniq_dict = NFABuilder.gen_uniq_dict(nfa_a, nfa_b)
+        NFABuilder.init_states(nfa_a, nfa_b, uniq_dict, nfa)
+
+        new_start_state = len(nfa.states) + 1
+        new_finish_state = len(nfa.states) + 2
+
+        nfa.set_start_state(new_start_state)
+        nfa.add_finish_state(new_finish_state)
+
+        nfa.add_transition(new_start_state, uniq_dict['a'][nfa_a.start_state], FiniteAutomation.epsilon)
+        nfa.add_transition(new_start_state, uniq_dict['b'][nfa_b.start_state], FiniteAutomation.epsilon)
+
+        for finish_state in nfa_a.finish_states:
+            nfa.add_transition(uniq_dict['a'][finish_state], new_finish_state, FiniteAutomation.epsilon)
+
+        for finish_state in nfa_b.finish_states:
+            nfa.add_transition(uniq_dict['b'][finish_state], new_finish_state, FiniteAutomation.epsilon)
+
+        return nfa
+
+    @staticmethod
+    def closure(nfa_a):
+        nfa = deepcopy(nfa_a)
+
+        new_start_state = len(nfa.states) + 1
+        new_finish_state = len(nfa.states) + 2
+
+        nfa.add_transition(new_start_state, nfa_a.start_state, FiniteAutomation.epsilon)
+        for finish_state in nfa.finish_states:
+            nfa.add_transition(finish_state, new_finish_state, FiniteAutomation.epsilon)
+            nfa.add_transition(finish_state, nfa.start_state, FiniteAutomation.epsilon)
+
+        nfa.add_transition(new_start_state, new_finish_state, FiniteAutomation.epsilon)
+
+        nfa.start_state = set()
+        nfa.finish_states = set()
+
+        nfa.set_start_state(new_start_state)
+        nfa.add_finish_state(new_finish_state)
+
+        return nfa
+
+
+
+
+    @staticmethod
+    def gen_uniq_dict(nfa_a, nfa_b):
+        return_dict = {'a': {},'b': {} }
+
+        for state in nfa_a.states:
+            return_dict['a'][state] = len(return_dict['a'])
+
+        for state in nfa_b.states:
+            return_dict['b'][state] = len(return_dict['a']) + len(return_dict['b'])
+
+
+        return return_dict
+
+    @staticmethod
+    def init_states(nfa_a, nfa_b, uniq_dict, nfa):
+        for from_state in nfa_a.transition:
+            for to_state in nfa_a.transition[from_state]:
+                for c in nfa_a.transition[from_state][to_state]:
+                    nfa.add_transition(uniq_dict['a'][from_state], uniq_dict['a'][to_state], c)
+
+        for from_state in nfa_b.transition:
+            for to_state in nfa_b.transition[from_state]:
+                for c in nfa_b.transition[from_state][to_state]:
+                    nfa.add_transition(uniq_dict['b'][from_state], uniq_dict['b'][to_state], c)
+
+
+
+
 
 
 

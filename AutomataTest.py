@@ -1,7 +1,7 @@
 __author__ = 'XinYu'
 
 import unittest
-from Automata import FiniteAutomation, NFA2DFA
+from Automata import FiniteAutomation, NFA2DFA, char2nfa, NFABuilder
 
 
 class TestAutomata(unittest.TestCase):
@@ -62,6 +62,30 @@ class TestAutomata(unittest.TestCase):
 
         self.dfa.sava_graph('beforeMinimal')
         minimal_dfa.sava_graph('afterMinimal')
+
+    def test_char2nfa(self):
+        nfa = char2nfa('h')
+        nfa.sava_graph('char2nfa')
+
+    def test_NFABuilder(self):
+        nfa_a = char2nfa('a')
+        nfa_b = char2nfa('b')
+
+        nfa_builder = NFABuilder()
+        nfa_builder.gen_uniq_dict(nfa_a, nfa_b)
+
+        nfa = nfa_builder.alternation(nfa_a, nfa_b)
+        nfa.sava_graph('alternation')
+
+        nfa = nfa_builder.concatentation(nfa_a, nfa_b)
+        nfa.sava_graph('concatentation')
+
+        nfa = nfa_builder.closure(nfa_a)
+        nfa.sava_graph('closure')
+
+        dfa = NFA2DFA()(nfa)
+        dfa.save_graph('closure_dfa')
+
 
 
 
