@@ -150,12 +150,34 @@ class NFA2DFA(object):
         P = set()
         Q = set([frozenset(dfa.finish_states), frozenset(dfa.states.difference(dfa.finish_states))])
 
-        # get subset combination
+        # 1.get subset combination
         while P != Q:
             P = Q
             Q = set()
             for p in P:
                 Q = set.union(NFA2DFA.split(p, P, dfa), Q)
+        # 2.build reversed dict
+        reversed_dict = {}
+        for states in P:
+            for state in states:
+                reversed_dict[state] = states
+
+        # 3.connect states
+        minimal_dfa = FiniteAutomation()
+
+        for from_state in dfa.transition:
+            for to_state in dfa.transition[from_state]:
+                for c in dfa.transition[from_state][to_state]:
+                    minimal_dfa.add_transition(reversed_dict[from_state], reversed_dict[to_state], c)
+
+        # 4.set start and finish states
+        minimal_dfa.set_start_state(reversed_dict[dfa.start_state])
+
+        for finish_states in dfa.finish_states:
+            minimal_dfa.add_finish_state(reversed_dict[finish_states])
+
+        return minimal_dfa
+
 
     @staticmethod
     def split(p, P, dfa):
