@@ -89,6 +89,7 @@ class FiniteAutomation(object):
         else:
             return None
 
+    @staticmethod
     def sava_graph(self, filename):
 
         node_dict = {}

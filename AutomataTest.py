@@ -44,7 +44,7 @@ class TestAutomata(unittest.TestCase):
 
     def test_nfa2dfa(self):
         self.dfa = NFA2DFA()(self.nfa)
-        self.dfa.sava_graph('dfa_graph')
+        FiniteAutomation.sava_graph(self.dfa, 'dfa_graph')
 
     def test_minimalDFA(self):
         self.dfa = FiniteAutomation()
@@ -60,8 +60,8 @@ class TestAutomata(unittest.TestCase):
 
         minimal_dfa = NFA2DFA.minimalDFA(self.dfa)
 
-        self.dfa.sava_graph('beforeMinimal')
-        minimal_dfa.sava_graph('afterMinimal')
+        FiniteAutomation.sava_graph(self.dfa, 'beforeMinimal')
+        FiniteAutomation.sava_graph(minimal_dfa, 'afterMinimal')
 
     def test_char2nfa(self):
         nfa = char2nfa('h')
@@ -75,16 +75,22 @@ class TestAutomata(unittest.TestCase):
         nfa_builder.gen_uniq_dict(nfa_a, nfa_b)
 
         nfa = nfa_builder.alternation(nfa_a, nfa_b)
-        nfa.sava_graph('alternation')
-
-        nfa = nfa_builder.concatentation(nfa_a, nfa_b)
-        nfa.sava_graph('concatentation')
-
-        nfa = nfa_builder.closure(nfa_a)
-        nfa.sava_graph('closure')
+        FiniteAutomation.sava_graph(nfa, 'alternation')
 
         dfa = NFA2DFA()(nfa)
-        dfa.save_graph('closure_dfa')
+        FiniteAutomation.sava_graph(dfa, 'minimal_alternation')
+
+        nfa = nfa_builder.concatentation(nfa_a, nfa_b)
+        FiniteAutomation.sava_graph(nfa, 'concatentation')
+
+        dfa = NFA2DFA()(nfa)
+        FiniteAutomation.sava_graph(dfa, 'minimal_concatentation')
+
+        nfa = nfa_builder.closure(nfa_a)
+        FiniteAutomation.sava_graph(nfa, 'closure')
+
+        dfa = NFA2DFA()(nfa)
+        FiniteAutomation.sava_graph(dfa, 'minimal_closure')
 
 
 
