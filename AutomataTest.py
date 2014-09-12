@@ -110,9 +110,9 @@ class TestAutomata(unittest.TestCase):
 
         input_stream = "abababcababcabab"
         lexer = Lexer(minimal_DFA, input_stream)
-        print lexer.get_token()
-        print lexer.get_token()
-        print lexer.get_token()
+        self.assertEqual(lexer.get_token(),("abababc", True))
+        self.assertEqual(lexer.get_token(),("ababc", True))
+        self.assertEqual(lexer.get_token(),(None, False))
 
 
 if __name__ == '__main__':

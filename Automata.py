@@ -374,9 +374,9 @@ class Lexer(object):
 
         # 4.return lexeme and token
         if state in self.dfa.finish_states:
-            return lexeme, True
+            return (lexeme, True)
         else:
-            return None, False
+            return (None, False)
 
 
 
