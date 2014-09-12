@@ -1,7 +1,7 @@
 __author__ = 'XinYu'
 
 import unittest
-from Automata import FiniteAutomation, NFA2DFA, char2nfa, NFABuilder
+from Automata import FiniteAutomation, NFA2DFA, char2nfa, NFABuilder, Lexer
 
 
 class TestAutomata(unittest.TestCase):
@@ -92,7 +92,27 @@ class TestAutomata(unittest.TestCase):
         dfa = NFA2DFA()(nfa)
         FiniteAutomation.sava_graph(dfa, 'minimal_closure')
 
+    def test_Lexer(self):
 
+        nfa_a = char2nfa('a')
+        nfa_b = char2nfa('b')
+        nfa_c = char2nfa('c')
+
+        nfa_builder = NFABuilder()
+
+        nfa_ab_concatentation = nfa_builder.concatentation(nfa_a, nfa_b)
+        nfa_ab_closure = nfa_builder.closure(nfa_ab_concatentation)
+        nfa_ab_or_ab_closure = nfa_builder.alternation(nfa_ab_concatentation, nfa_ab_closure)
+        nfa_ab_or_ab_closure_and_c = nfa_builder.concatentation(nfa_ab_or_ab_closure, nfa_c)
+
+        minimal_DFA = NFA2DFA()(nfa_ab_or_ab_closure_and_c)
+        FiniteAutomation.sava_graph(minimal_DFA, "lexer_testcase")
+
+        input_stream = "abababcababcabab"
+        lexer = Lexer(minimal_DFA, input_stream)
+        print lexer.get_token()
+        print lexer.get_token()
+        print lexer.get_token()
 
 
 if __name__ == '__main__':

@@ -327,16 +327,17 @@ class Lexer(object):
     def __init__(self, dfa, stream):
         self.dfa = dfa
         self.stream = stream
-        self.buf = []
+        self.buf = ""
 
     def get_char_from_buffer(self):
         c = self.buf[-1]
         self.buf = self.buf[:-1]
-        return c
+        return c, not (len(self.stream) + len(self.buf))
 
     def get_char_from_stream(self):
-        for c in self.stream:
-            yield c
+        c = self.stream[0]
+        self.stream = self.stream[1:]
+        return c, not (len(self.stream) + len(self.buf))
 
     def get_char(self):
         if len(self.buf) > 0:
@@ -353,9 +354,10 @@ class Lexer(object):
         bad_state = frozenset([])
         state_stack.append(bad_state)
 
+        is_last = not (len(self.stream) + len(self.buf))
         # 2.loop and transition until error
-        while state != None:
-            c = self.get_char()
+        while state != None and not is_last:
+            c, is_last = self.get_char()
             lexeme += c
             if state in self.dfa.finish_states:
                 state_stack = []
@@ -366,8 +368,9 @@ class Lexer(object):
         # 3.rollback until a finish state
         while state not in self.dfa.finish_states and state != bad_state:
             state = state_stack.pop()
-            self.buf.append(lexeme[-1])
-            lexeme = lexeme[:-1]
+            if len(lexeme) > 0 :
+                self.buf += lexeme[-1]
+                lexeme = lexeme[:-1]
 
         # 4.return lexeme and token
         if state in self.dfa.finish_states:
