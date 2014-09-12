@@ -323,6 +323,62 @@ class NFABuilder(object):
 
 
 
+class Lexer(object):
+    def __init__(self, dfa, stream):
+        self.dfa = dfa
+        self.stream = stream
+        self.buf = []
+
+    def get_char_from_buffer(self):
+        c = self.buf[-1]
+        self.buf = self.buf[:-1]
+        return c
+
+    def get_char_from_stream(self):
+        for c in self.stream:
+            yield c
+
+    def get_char(self):
+        if len(self.buf) > 0:
+            return self.get_char_from_buffer()
+        else:
+            return self.get_char_from_stream()
+
+    def get_token(self):
+
+        # 1.init state, stack, lexeme
+        state_stack = []
+        lexeme = ""
+        state = self.dfa.start_state
+        bad_state = frozenset([])
+        state_stack.append(bad_state)
+
+        # 2.loop and transition until error
+        while state != None:
+            c = self.get_char()
+            lexeme += c
+            if state in self.dfa.finish_states:
+                state_stack = []
+            state_stack.append(state)
+
+            state = self.dfa.get_single_transition(state, c)
+
+        # 3.rollback until a finish state
+        while state not in self.dfa.finish_states and state != bad_state:
+            state = state_stack.pop()
+            self.buf.append(lexeme[-1])
+            lexeme = lexeme[:-1]
+
+        # 4.return lexeme and token
+        if state in self.dfa.finish_states:
+            return lexeme, True
+        else:
+            return None, False
+
+
+
+
+
 
 
 
