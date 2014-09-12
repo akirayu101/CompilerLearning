@@ -377,12 +377,4 @@ class Lexer(object):
             return (lexeme, True)
         else:
             return (None, False)
-
-
-
-
-
-
-
-
-
+        
