@@ -328,6 +328,14 @@ class Lexer(object):
         self.dfa = dfa
         self.stream = stream
         self.buf = ""
+        self.input_pos = 0
+        self.fail_dict = {}
+        for state in self.dfa.states:
+            if state not in self.fail_dict:
+                self.fail_dict[state] = {}
+            for pos in xrange(1,len(self.stream)+1):
+                self.fail_dict[state][pos] = False
+
 
     def get_char_from_buffer(self):
         c = self.buf[-1]
@@ -377,4 +385,39 @@ class Lexer(object):
             return (lexeme, True)
         else:
             return (None, False)
-        
+
+    def get_token_optimazed(self):
+        stack = []
+        lexeme = ""
+        state = self.dfa.start_state
+        bad_state = frozenset([])
+        stack.append((bad_state, self.input_pos))
+
+        is_last = not (len(self.stream) + len(self.buf))
+
+        while state != None and not is_last:
+            c, is_last = self.get_char()
+            self.input_pos += 1
+            lexeme += c
+            if self.fail_dict[state][self.input_pos]:
+                break
+            if state in self.dfa.finish_states:
+                stack = []
+            stack.append((state, self.input_pos))
+            state = self.dfa.get_single_transition(state, c)
+
+        while state not in self.dfa.finish_states and state != bad_state:
+            if state:
+                self.fail_dict[state][self.input_pos] = True
+            (state, _) = stack.pop()
+            self.input_pos -= 1
+
+            if len(lexeme) > 0 :
+                self.buf += lexeme[-1]
+                lexeme = lexeme[:-1]
+
+        if state in self.dfa.finish_states:
+            return (lexeme, True)
+        else:
+            return (None, False)
+
