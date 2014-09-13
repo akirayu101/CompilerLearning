@@ -107,6 +107,7 @@ class TestAutomata(unittest.TestCase):
         nfa_builder = NFABuilder()
 
         nfa_ab_concatentation = nfa_builder.concatentation(nfa_a, nfa_b)
+        nfa_ab_concatentation.set_token('ab', 1)
         nfa_ab_closure = nfa_builder.closure(nfa_ab_concatentation)
         nfa_ab_or_ab_closure = nfa_builder.alternation(
             nfa_ab_concatentation, nfa_ab_closure)
@@ -115,6 +116,7 @@ class TestAutomata(unittest.TestCase):
 
         nfa_ab_closure_and_c = nfa_builder.concatentation(
             nfa_ab_closure, nfa_c)
+        nfa_ab_closure_and_c.set_token('ab*c', 1)
         nfa_ab_or_ab_closure_and_c_r = nfa_builder.alternation(
             nfa_ab_concatentation, nfa_ab_closure_and_c)
 
