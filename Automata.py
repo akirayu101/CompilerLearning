@@ -118,9 +118,11 @@ class FiniteAutomation(object):
         for s in self.finish_states:
             if self.token.has_key(s):
                 (token, _) = self.token[s]
-                dot.node(node_reverse_dict[s], _attributes={'shape': 'doublecircle', 'label': token})
+                dot.node(node_reverse_dict[s], _attributes={
+                         'shape': 'doublecircle', 'label': token})
             else:
-                dot.node(node_reverse_dict[s], _attributes={'shape': 'doublecircle'})
+                dot.node(
+                    node_reverse_dict[s], _attributes={'shape': 'doublecircle'})
 
         dot.render(filename, view=True)
 
@@ -138,6 +140,7 @@ class FiniteAutomation(object):
 
 
 class NFA2DFA(object):
+
     def __call__(self, nfa):
         dfa = FiniteAutomation()
         dfa.set_start_state(nfa.get_e_closure(nfa.start_state))
@@ -168,7 +171,8 @@ class NFA2DFA(object):
     @staticmethod
     def minimalDFA(dfa, nfa):
         P = set()
-        Q = set([frozenset(dfa.finish_states), frozenset(dfa.states.difference(dfa.finish_states))])
+        Q = set([frozenset(dfa.finish_states), frozenset(
+            dfa.states.difference(dfa.finish_states))])
 
         # 1.get subset combination
         while P != Q:
@@ -188,7 +192,8 @@ class NFA2DFA(object):
         for from_state in dfa.transition:
             for to_state in dfa.transition[from_state]:
                 for c in dfa.transition[from_state][to_state]:
-                    minimal_dfa.add_transition(reversed_dict[from_state], reversed_dict[to_state], c)
+                    minimal_dfa.add_transition(
+                        reversed_dict[from_state], reversed_dict[to_state], c)
 
         # 4.set start and finish states
         minimal_dfa.set_start_state(reversed_dict[dfa.start_state])
@@ -199,10 +204,10 @@ class NFA2DFA(object):
             for nfa_finish_state in nfa.finish_states:
                 if nfa_finish_state in finish_states and nfa_finish_state in nfa.token:
                     (token, priority) = nfa.token[nfa_finish_state]
-                    minimal_dfa.set_state_token(reversed_dict[finish_states], token, priority)
+                    minimal_dfa.set_state_token(
+                        reversed_dict[finish_states], token, priority)
 
         return minimal_dfa
-
 
     @staticmethod
     def split(p, P, dfa):
@@ -254,6 +259,7 @@ def char2nfa(c):
 
 
 class NFABuilder(object):
+
     @staticmethod
     def concatentation(nfa_a, nfa_b):
         nfa = FiniteAutomation()
@@ -271,7 +277,6 @@ class NFABuilder(object):
 
         return nfa
 
-
     @staticmethod
     def alternation(nfa_a, nfa_b):
         nfa = FiniteAutomation()
@@ -284,14 +289,32 @@ class NFABuilder(object):
         nfa.set_start_state(new_start_state)
         nfa.add_finish_state(new_finish_state)
 
-        nfa.add_transition(new_start_state, uniq_dict['a'][nfa_a.start_state], FiniteAutomation.epsilon)
-        nfa.add_transition(new_start_state, uniq_dict['b'][nfa_b.start_state], FiniteAutomation.epsilon)
+        nfa.add_transition(
+            new_start_state, uniq_dict['a'][nfa_a.start_state], FiniteAutomation.epsilon)
+        nfa.add_transition(
+            new_start_state, uniq_dict['b'][nfa_b.start_state], FiniteAutomation.epsilon)
 
         for finish_state in nfa_a.finish_states:
-            nfa.add_transition(uniq_dict['a'][finish_state], new_finish_state, FiniteAutomation.epsilon)
+            nfa.add_transition(
+                uniq_dict['a'][finish_state], new_finish_state, FiniteAutomation.epsilon)
+            nfa.add_finish_state(uniq_dict['a'][finish_state])
+
+            # the alternation operation preserve token
+            if nfa_a.token.has_key(finish_state):
+                (token, priority) = nfa_a.token[finish_state]
+                nfa.set_state_token(
+                    uniq_dict['a'][finish_state], token, priority)
 
         for finish_state in nfa_b.finish_states:
-            nfa.add_transition(uniq_dict['b'][finish_state], new_finish_state, FiniteAutomation.epsilon)
+            nfa.add_transition(
+                uniq_dict['b'][finish_state], new_finish_state, FiniteAutomation.epsilon)
+            nfa.add_finish_state(uniq_dict['b'][finish_state])
+
+            # the alternation operation preserve token
+            if nfa_b.token.has_key(finish_state):
+                (token, priority) = nfa_b.token[finish_state]
+                nfa.set_state_token(
+                    uniq_dict['b'][finish_state], token, priority)
 
         return nfa
 
@@ -302,12 +325,16 @@ class NFABuilder(object):
         new_start_state = len(nfa.states) + 1
         new_finish_state = len(nfa.states) + 2
 
-        nfa.add_transition(new_start_state, nfa_a.start_state, FiniteAutomation.epsilon)
+        nfa.add_transition(
+            new_start_state, nfa_a.start_state, FiniteAutomation.epsilon)
         for finish_state in nfa.finish_states:
-            nfa.add_transition(finish_state, new_finish_state, FiniteAutomation.epsilon)
-            nfa.add_transition(finish_state, nfa.start_state, FiniteAutomation.epsilon)
+            nfa.add_transition(
+                finish_state, new_finish_state, FiniteAutomation.epsilon)
+            nfa.add_transition(
+                finish_state, nfa.start_state, FiniteAutomation.epsilon)
 
-        nfa.add_transition(new_start_state, new_finish_state, FiniteAutomation.epsilon)
+        nfa.add_transition(
+            new_start_state, new_finish_state, FiniteAutomation.epsilon)
 
         nfa.start_state = set()
         nfa.finish_states = set()
@@ -317,7 +344,6 @@ class NFABuilder(object):
 
         return nfa
 
-
     @staticmethod
     def gen_uniq_dict(nfa_a, nfa_b):
         return_dict = {'a': {}, 'b': {}}
@@ -326,7 +352,8 @@ class NFABuilder(object):
             return_dict['a'][state] = len(return_dict['a'])
 
         for state in nfa_b.states:
-            return_dict['b'][state] = len(return_dict['a']) + len(return_dict['b'])
+            return_dict['b'][state] = len(
+                return_dict['a']) + len(return_dict['b'])
 
         return return_dict
 
@@ -335,15 +362,18 @@ class NFABuilder(object):
         for from_state in nfa_a.transition:
             for to_state in nfa_a.transition[from_state]:
                 for c in nfa_a.transition[from_state][to_state]:
-                    nfa.add_transition(uniq_dict['a'][from_state], uniq_dict['a'][to_state], c)
+                    nfa.add_transition(
+                        uniq_dict['a'][from_state], uniq_dict['a'][to_state], c)
 
         for from_state in nfa_b.transition:
             for to_state in nfa_b.transition[from_state]:
                 for c in nfa_b.transition[from_state][to_state]:
-                    nfa.add_transition(uniq_dict['b'][from_state], uniq_dict['b'][to_state], c)
+                    nfa.add_transition(
+                        uniq_dict['b'][from_state], uniq_dict['b'][to_state], c)
 
 
 class Lexer(object):
+
     def __init__(self, dfa, stream):
         self.dfa = dfa
         self.stream = stream
@@ -356,7 +386,6 @@ class Lexer(object):
                 self.fail_dict[state] = {}
             for pos in xrange(1, len(self.stream) + 1):
                 self.fail_dict[state][pos] = False
-
 
     def get_char_from_buffer(self):
         c = self.buf[-1]
@@ -450,6 +479,3 @@ class Lexer(object):
 
     def push_token(self, token):
         self.tokens.append(token)
-
-
-

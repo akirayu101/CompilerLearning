@@ -78,6 +78,8 @@ class TestAutomata(unittest.TestCase):
         nfa_builder = NFABuilder()
         nfa_builder.gen_uniq_dict(nfa_a, nfa_b)
 
+        nfa_a.set_token("test a", 1)
+        nfa_b.set_token("test b", 2)
         nfa = nfa_builder.alternation(nfa_a, nfa_b)
         FiniteAutomation.sava_graph(nfa, 'alternation')
 
@@ -106,34 +108,38 @@ class TestAutomata(unittest.TestCase):
 
         nfa_ab_concatentation = nfa_builder.concatentation(nfa_a, nfa_b)
         nfa_ab_closure = nfa_builder.closure(nfa_ab_concatentation)
-        nfa_ab_or_ab_closure = nfa_builder.alternation(nfa_ab_concatentation, nfa_ab_closure)
-        nfa_ab_or_ab_closure_and_c = nfa_builder.concatentation(nfa_ab_or_ab_closure, nfa_c)
+        nfa_ab_or_ab_closure = nfa_builder.alternation(
+            nfa_ab_concatentation, nfa_ab_closure)
+        nfa_ab_or_ab_closure_and_c = nfa_builder.concatentation(
+            nfa_ab_or_ab_closure, nfa_c)
 
-        nfa_ab_closure_and_c = nfa_builder.concatentation(nfa_ab_closure, nfa_c)
-        nfa_ab_or_ab_closure_and_c_r = nfa_builder.alternation(nfa_ab_concatentation, nfa_ab_closure_and_c)
+        nfa_ab_closure_and_c = nfa_builder.concatentation(
+            nfa_ab_closure, nfa_c)
+        nfa_ab_or_ab_closure_and_c_r = nfa_builder.alternation(
+            nfa_ab_concatentation, nfa_ab_closure_and_c)
 
         minimal_DFA = NFA2DFA()(nfa_ab_or_ab_closure_and_c)
         FiniteAutomation.sava_graph(minimal_DFA, "lexer_testcase1")
 
         input_stream = "abababcababcabab"
         lexer = Lexer(minimal_DFA, input_stream)
-        self.assertEqual(lexer.get_token(),("abababc", True))
+        self.assertEqual(lexer.get_token(), ("abababc", True))
         lexer.push_token(("abababc", True))
-        self.assertEqual(lexer.get_token(),("abababc", True))
-        self.assertEqual(lexer.get_token(),("ababc", True))
+        self.assertEqual(lexer.get_token(), ("abababc", True))
+        self.assertEqual(lexer.get_token(), ("ababc", True))
         lexer.push_token(("ababc", True))
-        self.assertEqual(lexer.get_token(),("ababc", True))
-        self.assertEqual(lexer.get_token(),(None, False))
+        self.assertEqual(lexer.get_token(), ("ababc", True))
+        self.assertEqual(lexer.get_token(), (None, False))
 
         minimal_DFA = NFA2DFA()(nfa_ab_or_ab_closure_and_c_r)
         FiniteAutomation.sava_graph(minimal_DFA, "lexer_testcase2")
         input_stream = "abababab"
         lexer = Lexer(minimal_DFA, input_stream)
-        self.assertEqual(lexer.get_token(),("ab", True))
-        self.assertEqual(lexer.get_token(),("ab", True))
-        self.assertEqual(lexer.get_token(),("ab", True))
-        self.assertEqual(lexer.get_token(),("ab", True))
-        self.assertEqual(lexer.get_token(),(None, False))
+        self.assertEqual(lexer.get_token(), ("ab", True))
+        self.assertEqual(lexer.get_token(), ("ab", True))
+        self.assertEqual(lexer.get_token(), ("ab", True))
+        self.assertEqual(lexer.get_token(), ("ab", True))
+        self.assertEqual(lexer.get_token(), (None, False))
 
 if __name__ == '__main__':
     unittest.main()
