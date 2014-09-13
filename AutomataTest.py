@@ -24,6 +24,7 @@ class TestAutomata(unittest.TestCase):
         self.fa.add_finish_state('J')
 
         self.nfa = self.fa
+        self.nfa.set_token('test_nfa', 1)
 
     def test_eclosure(self):
         self.assertEqual(self.fa.get_e_closure('A'),
@@ -43,6 +44,7 @@ class TestAutomata(unittest.TestCase):
             set(['F', 'G', 'H', 'I', 'A', 'B', 'C', 'D']))
 
     def test_nfa2dfa(self):
+        FiniteAutomation.sava_graph(self.nfa, 'nfa_graph')
         self.dfa = NFA2DFA()(self.nfa)
         FiniteAutomation.sava_graph(self.dfa, 'dfa_graph')
 
@@ -58,7 +60,9 @@ class TestAutomata(unittest.TestCase):
         self.dfa.add_finish_state('s3')
         self.dfa.add_finish_state('s5')
 
-        minimal_dfa = NFA2DFA.minimalDFA(self.dfa)
+        self.dfa.set_token('test_minimal', 1)
+
+        minimal_dfa = NFA2DFA.minimalDFA(self.dfa, self.dfa)
 
         FiniteAutomation.sava_graph(self.dfa, 'beforeMinimal')
         FiniteAutomation.sava_graph(minimal_dfa, 'afterMinimal')

@@ -14,6 +14,7 @@ class FiniteAutomation(object):
         self.language = set()
         self.transition = dict()
         self.transition_fn = dict()
+        self.token = {}
 
     def set_start_state(self, state):
         self.start_state = state
@@ -115,8 +116,25 @@ class FiniteAutomation(object):
                              label)
 
         for s in self.finish_states:
-            dot.node(node_reverse_dict[s], _attributes={'shape': 'doublecircle'})
+            if self.token.has_key(s):
+                (token, _) = self.token[s]
+                dot.node(node_reverse_dict[s], _attributes={'shape': 'doublecircle', 'label': token})
+            else:
+                dot.node(node_reverse_dict[s], _attributes={'shape': 'doublecircle'})
+
         dot.render(filename, view=True)
+
+    def set_token(self, token, priority):
+        for state in self.finish_states:
+            self.token[state] = (token, priority)
+
+    def set_state_token(self, state, token, priority):
+        if state not in self.token:
+            self.token[state] = (token, priority)
+        else:
+            (_, pre_priority) = self.token[state]
+            if pre_priority < priority:
+                self.token[state] = (token, priority)
 
 
 class NFA2DFA(object):
@@ -141,14 +159,14 @@ class NFA2DFA(object):
             if NFA2DFA.is_finish_state(state, nfa):
                 dfa.add_finish_state(state)
 
-        return NFA2DFA.minimalDFA(dfa)
+        return NFA2DFA.minimalDFA(dfa, nfa)
 
     @staticmethod
     def is_finish_state(states, nfa):
         return len(states.intersection(nfa.finish_states)) > 0
 
     @staticmethod
-    def minimalDFA(dfa):
+    def minimalDFA(dfa, nfa):
         P = set()
         Q = set([frozenset(dfa.finish_states), frozenset(dfa.states.difference(dfa.finish_states))])
 
@@ -177,6 +195,11 @@ class NFA2DFA(object):
 
         for finish_states in dfa.finish_states:
             minimal_dfa.add_finish_state(reversed_dict[finish_states])
+            # here we should also set dfa token
+            for nfa_finish_state in nfa.finish_states:
+                if nfa_finish_state in finish_states and nfa_finish_state in nfa.token:
+                    (token, priority) = nfa.token[nfa_finish_state]
+                    minimal_dfa.set_state_token(reversed_dict[finish_states], token, priority)
 
         return minimal_dfa
 
@@ -243,7 +266,8 @@ class NFABuilder(object):
             nfa.add_finish_state(uniq_dict['b'][finish_state])
 
         for finish_state in nfa_a.finish_states:
-            nfa.add_transition(uniq_dict['a'][finish_state], uniq_dict['b'][nfa_b.start_state], FiniteAutomation.epsilon)
+            nfa.add_transition(uniq_dict['a'][finish_state], uniq_dict['b'][nfa_b.start_state],
+                               FiniteAutomation.epsilon)
 
         return nfa
 
@@ -294,18 +318,15 @@ class NFABuilder(object):
         return nfa
 
 
-
-
     @staticmethod
     def gen_uniq_dict(nfa_a, nfa_b):
-        return_dict = {'a': {},'b': {} }
+        return_dict = {'a': {}, 'b': {}}
 
         for state in nfa_a.states:
             return_dict['a'][state] = len(return_dict['a'])
 
         for state in nfa_b.states:
             return_dict['b'][state] = len(return_dict['a']) + len(return_dict['b'])
-
 
         return return_dict
 
@@ -322,7 +343,6 @@ class NFABuilder(object):
                     nfa.add_transition(uniq_dict['b'][from_state], uniq_dict['b'][to_state], c)
 
 
-
 class Lexer(object):
     def __init__(self, dfa, stream):
         self.dfa = dfa
@@ -334,7 +354,7 @@ class Lexer(object):
         for state in self.dfa.states:
             if state not in self.fail_dict:
                 self.fail_dict[state] = {}
-            for pos in xrange(1,len(self.stream)+1):
+            for pos in xrange(1, len(self.stream) + 1):
                 self.fail_dict[state][pos] = False
 
 
@@ -377,7 +397,7 @@ class Lexer(object):
         # 3.rollback until a finish state
         while state not in self.dfa.finish_states and state != bad_state:
             state = state_stack.pop()
-            if len(lexeme) > 0 :
+            if len(lexeme) > 0:
                 self.buf += lexeme[-1]
                 lexeme = lexeme[:-1]
 
@@ -413,7 +433,7 @@ class Lexer(object):
             (state, _) = stack.pop()
             self.input_pos -= 1
 
-            if len(lexeme) > 0 :
+            if len(lexeme) > 0:
                 self.buf += lexeme[-1]
                 lexeme = lexeme[:-1]
 
