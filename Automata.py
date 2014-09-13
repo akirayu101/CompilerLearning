@@ -329,6 +329,7 @@ class Lexer(object):
         self.stream = stream
         self.buf = ""
         self.input_pos = 0
+        self.tokens = []
         self.fail_dict = {}
         for state in self.dfa.states:
             if state not in self.fail_dict:
@@ -353,7 +354,7 @@ class Lexer(object):
         else:
             return self.get_char_from_stream()
 
-    def get_token(self):
+    def get_token_simple(self):
 
         # 1.init state, stack, lexeme
         state_stack = []
@@ -420,4 +421,15 @@ class Lexer(object):
             return (lexeme, True)
         else:
             return (None, False)
+
+    def get_token(self):
+        if len(self.tokens) > 0:
+            return self.tokens.pop()
+        else:
+            return self.get_token_optimazed()
+
+    def push_token(self, token):
+        self.tokens.append(token)
+
+
 
