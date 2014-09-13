@@ -65,7 +65,7 @@ class TestAutomata(unittest.TestCase):
 
     def test_char2nfa(self):
         nfa = char2nfa('h')
-        nfa.sava_graph('char2nfa')
+        FiniteAutomation.sava_graph(nfa, 'char2nfa')
 
     def test_NFABuilder(self):
         nfa_a = char2nfa('a')
