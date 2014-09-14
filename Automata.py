@@ -381,6 +381,7 @@ class Lexer(object):
         self.buf = ""
         self.input_pos = 0
         self.tokens = []
+        self.keyword_dict = {}
         self.fail_dict = {}
         for state in self.dfa.states:
             if state not in self.fail_dict:
@@ -468,9 +469,19 @@ class Lexer(object):
                 lexeme = lexeme[:-1]
 
         if state in self.dfa.finish_states:
-            return (lexeme, True)
+            if self.keyword_dict.has_key(lexeme):
+                return (lexeme, self.keyword_dict[lexeme])
+            elif self.dfa.token.has_key(state):
+                (token, _) =  self.dfa.token[state]
+                return (lexeme, token)
+            else:
+                return (lexeme, True)
+
+        is_last = not (len(self.stream) + len(self.buf))
+        if is_last:
+            return (None, 'EOF')
         else:
-            return (None, False)
+            return (None, 'Error')
 
     def get_token(self):
         if len(self.tokens) > 0:
@@ -480,6 +491,9 @@ class Lexer(object):
 
     def push_token(self, token):
         self.tokens.append(token)
+
+    def set_keyword_dict(self, keyword_dict):
+        self.keyword_dict = keyword_dict
 
 class RE2DFA(object):
     def __init__(self):

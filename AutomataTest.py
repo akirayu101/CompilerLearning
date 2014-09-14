@@ -131,17 +131,15 @@ class TestAutomata(unittest.TestCase):
         self.assertEqual(lexer.get_token(), ("ababc", True))
         lexer.push_token(("ababc", True))
         self.assertEqual(lexer.get_token(), ("ababc", True))
-        self.assertEqual(lexer.get_token(), (None, False))
+        self.assertEqual(lexer.get_token(), (None, 'Error'))
 
         minimal_DFA = NFA2DFA()(nfa_ab_or_ab_closure_and_c_r)
         FiniteAutomation.sava_graph(minimal_DFA, "lexer_testcase2")
-        input_stream = "abababab"
+        input_stream = "abababcab"
         lexer = Lexer(minimal_DFA, input_stream)
-        self.assertEqual(lexer.get_token(), ("ab", True))
-        self.assertEqual(lexer.get_token(), ("ab", True))
-        self.assertEqual(lexer.get_token(), ("ab", True))
-        self.assertEqual(lexer.get_token(), ("ab", True))
-        self.assertEqual(lexer.get_token(), (None, False))
+        self.assertEqual(lexer.get_token(), ("abababc", "ab*c"))
+        self.assertEqual(lexer.get_token(), ("ab", "ab"))
+        self.assertEqual(lexer.get_token(), (None, 'EOF'))
 
     def test_RE2DFA(self):
         re2nfa = RE2DFA()
