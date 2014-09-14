@@ -2,6 +2,7 @@ __author__ = 'XinYu'
 
 from graphviz import Digraph
 from copy import deepcopy
+import string
 
 
 class FiniteAutomation(object):
@@ -479,3 +480,41 @@ class Lexer(object):
 
     def push_token(self, token):
         self.tokens.append(token)
+
+class RE2DFA(object):
+    def __init__(self):
+
+        self.charsets = {
+            'char': string.letters,
+            'digit': string.digits,
+            'left_bracket': ['['],
+            'right_bracket': [']'],
+            'left_parentheses': ['('],
+            'right_parentheses': [')'],
+            'to': ['-'],
+            'closure': ['+'],
+        }
+
+        self.sub_nfas = []
+
+        for key, charset in self.charsets.items():
+            char_nfas = []
+            for c in charset:
+                char_nfas.append(char2nfa(c))
+            sub_nfa = FiniteAutomation()
+            if len(char_nfas) > 1:
+                sub_nfa = reduce(NFABuilder.alternation, char_nfas, char_nfas[0])
+            else:
+                sub_nfa = char_nfas[0]
+
+            sub_nfa.set_token('re charset', 1)
+            self.sub_nfas.append(sub_nfa)
+
+        self.nfa = reduce(NFABuilder.alternation, self.sub_nfas, self.sub_nfas[0])
+        self.dfa = NFA2DFA()(self.nfa)
+
+class REParser(object):
+    def __init__(self, stream):
+        self.stream = stream
+        self.dfa = RE2DFA()
+        self.lexer = Lexer(self.dfa, self.stream)

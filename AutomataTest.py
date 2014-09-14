@@ -1,7 +1,7 @@
 __author__ = 'XinYu'
 
 import unittest
-from Automata import FiniteAutomation, NFA2DFA, char2nfa, NFABuilder, Lexer
+from Automata import FiniteAutomation, NFA2DFA, char2nfa, NFABuilder, Lexer, RE2DFA
 
 
 class TestAutomata(unittest.TestCase):
@@ -142,6 +142,9 @@ class TestAutomata(unittest.TestCase):
         self.assertEqual(lexer.get_token(), ("ab", True))
         self.assertEqual(lexer.get_token(), ("ab", True))
         self.assertEqual(lexer.get_token(), (None, False))
+
+    def test_RE2DFA(self):
+        re2nfa = RE2DFA()
 
 if __name__ == '__main__':
     unittest.main()
