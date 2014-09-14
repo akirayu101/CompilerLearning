@@ -1,7 +1,7 @@
 __author__ = 'XinYu'
 
 import unittest
-from Automata import FiniteAutomation, NFA2DFA, char2nfa, NFABuilder, Lexer, RE2DFA
+from Automata import FiniteAutomation, NFA2DFA, char2nfa, NFABuilder, Lexer, RE2DFA, REParser
 
 
 class TestAutomata(unittest.TestCase):
@@ -143,6 +143,10 @@ class TestAutomata(unittest.TestCase):
 
     def test_RE2DFA(self):
         re2nfa = RE2DFA()
+
+    def test_REParser(self):
+        re_str = '(ab)[a-z]+'
+        re_parser = REParser(re_str)
 
 if __name__ == '__main__':
     unittest.main()

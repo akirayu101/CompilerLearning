@@ -530,5 +530,19 @@ class RE2DFA(object):
 class REParser(object):
     def __init__(self, stream):
         self.stream = stream
-        self.dfa = RE2DFA()
+        self.dfa = RE2DFA().dfa
         self.lexer = Lexer(self.dfa, self.stream)
+        self.lexer_dict = {}
+        for x in string.digits:
+            self.lexer_dict[x] = 'char'
+        for x in string.letters:
+            self.lexer_dict[x] = 'char'
+
+        self.lexer_dict['('] = 'left_parentheses'
+        self.lexer_dict[')'] = 'right_parentheses'
+        self.lexer_dict['['] = 'left_bracket'
+        self.lexer_dict[']'] = 'right_bracket'
+        self.lexer_dict['+'] = 'closure'
+        self.lexer_dict['-'] = 'to'
+        self.lexer.set_keyword_dict(self.lexer_dict)
+
